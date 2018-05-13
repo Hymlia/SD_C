@@ -2,6 +2,7 @@
 
 u_long prognum;
 bloc chainbloc[100] ;
+operation attente[50];
 
 short inscription(int b) {
   static int res = 1;
@@ -27,6 +28,9 @@ int main (int argc, char *argv[]) {
   for(int i=0; i<100; i++) {
     bloc bloccourant = {.operations ={operationvide,operationvide,operationvide,operationvide},.hash="3",.previoushash=""};
     chainbloc[i] = bloccourant;
+  }
+  for(int i=0; i<50;i++) {
+    attente[i]=operationvide;
   }
 
 
