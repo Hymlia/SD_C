@@ -34,7 +34,10 @@ int main (int argc, char *argv[])
   }
   else {
     printf("Le noeud n'est pas inscrit\n");
+    return 1;
   }
+
+  
 
   return 0;
 

@@ -17,5 +17,11 @@ struct operation {
 };
 typedef struct operation operation;
 
+struct bloc {
+  operation[4] operations;
+  char * hash;
+  char * previoushash;
+}
+typedef struct bloc bloc;
 
 #endif
