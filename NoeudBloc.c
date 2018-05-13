@@ -13,10 +13,29 @@ bool_t xdr_operation(XDR * xdrs , operation * o) {
 }
 
 /*
+ * Operations auxiliaires
+ */
+
+int ajoutoperationdansattente(operation o) {
+  int i=0;
+  while(i<50 && strcmp(attente[i].nom, "")!=0) {
+    i++;
+  }
+  if(i!=50) {
+    attente[i]=o;
+    return 1;
+  }
+  else {
+    return -1;
+  }
+}
+
+
+/*
  * Operations serveur
  */
-short inscription(int id) {
-  static int res = 1;
+int * inscription(int id) {
+  static int resinsc = 1;
   printf("Inscription acceptée par le serveur\n");
   operation o = {"Inscription", id , 0 , 0};
   ajoutoperationdansattente(o);
@@ -26,7 +45,7 @@ short inscription(int id) {
       noeudb nbcourant = voisins[i];
       int retour;
       enum clnt_stat stat ;
-      stat = callrpc(nbcourant.addr,nbcourant.pn, VERSNUM, 4, (xdrproc_t) xdr_operation, (char *)&o , (xdrproc_t) xdr_int , (char *)&res );
+      stat = callrpc(nbcourant.addr,nbcourant.pn, VERSNUM, 4, (xdrproc_t) xdr_operation, (char *)&o , (xdrproc_t) xdr_int , (char *)&retour );
 
       if(stat != RPC_SUCCESS) {
         fprintf(stderr, "Echec de l'appel distant\n") ;
@@ -35,7 +54,7 @@ short inscription(int id) {
         return 1 ;
       }
 
-      if(res==1) {
+      if(retour==1) {
         printf("L'operation a été envoyée au voisin %s : %lu\n", nbcourant.addr, nbcourant.pn);
       }
       else {
@@ -43,50 +62,47 @@ short inscription(int id) {
       }
     }
   }
-  return &res;
+  return &resinsc;
 }
 
-float demandepts(int id) {
-  float res = 0;
+float * demandepts(int id) {
+  static float respts = 0;
   for(int i=0; i<100; i++) {
     if(strcmp(chainbloc[i].hash,"")!=0) {
       for(int j = 0; j<4; j++) {
         operation o = chainbloc[i].operations[j];
         if(strcmp(o.nom, "Don")==0) {
           if(o.noeud1 == id) {
-            res =res - o.quantite;
+            respts =respts - o.quantite;
           }
           else if(o.noeud2 == id) {
-            res =res + o.quantite;
+            respts =respts + o.quantite;
           }
         }
       }
     }
   }
-  return res;
+  return &respts;
 }
 
-void recevoirbloc(bloc b) {
+void * recevoirbloc(bloc b) {
 
 }
 
-void recevoiroperation(operation o) {
-  
-}
-
-/*
- * Operations auxiliaires
- */
-
-void ajoutoperationdansattente(operation o) {
-  int i=0;
-  while(i<50 && strcmp(attente[i].nom, "")!=0) {
-    i++;
+int * recevoiroperation(operation o) {
+  int i = ajoutoperationdansattente(o);
+  static int resro ;
+  if(i==1) {
+    resro=1;
   }
-  if(i!=50) {
-    attente[i]=o;
+  else {
+    resro=-1;
   }
+  return &resro;
+
+
 }
+
 
 /*
  * creation blocs
