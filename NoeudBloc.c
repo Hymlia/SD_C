@@ -20,7 +20,7 @@ short inscription(int id) {
       noeudb nbcourant = voisins[i];
       int retour;
       enum clnt_stat stat ;
-      stat = callrpc(nbcourant.addr,nbcourant.pn, VERSNUM, 4, (xdrproc_t) xdr_operation, (char *)&o , (xdrproc_t) xdr_float , (char *)&res );
+      stat = callrpc(nbcourant.addr,nbcourant.pn, VERSNUM, 4, (xdrproc_t) xdr_operation, (char *)&o , (xdrproc_t) xdr_int , (char *)&res );
 
       if(stat != RPC_SUCCESS) {
         fprintf(stderr, "Echec de l'appel distant\n") ;
@@ -119,7 +119,8 @@ int main (int argc, char *argv[]) {
 
 
   registerrpc(prognum , VERSNUM, 1, inscription, (xdrproc_t) xdr_int, (xdrproc_t) xdr_int);
-  registerrpc(prognum , VERSNUM, 1, demandepts, (xdrproc_t) xdr_int, (xdrproc_t) xdr_float);
+  registerrpc(prognum , VERSNUM, 2, demandepts, (xdrproc_t) xdr_int, (xdrproc_t) xdr_float);
+  registerrpc(prognum , VERSNUM, 3, recevoiroperation, (xdrproc_t) xdr_operation, (xdrproc_t) xdr_int);
   svc_run();
   return 0;
 }
