@@ -4,6 +4,7 @@
 #include <rpc/types.h>
 #include <rpc/xdr.h>
 #include <rpc/rpc.h>
+#include <stdio.h>
 
 #define VERSNUM 1
 #define PROCNUM 1

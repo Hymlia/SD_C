@@ -3,8 +3,9 @@
 char * prognum;
 
 short inscription(int b) {
+  static int res = 1;
   printf("Inscription acceptée par le serveur\n");
-  return (int)1;
+  return &res;
 
 }
 
