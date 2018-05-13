@@ -6,6 +6,7 @@
 #include <rpc/rpc.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
 
 #define VERSNUM 1
 #define PROCNUM 1
