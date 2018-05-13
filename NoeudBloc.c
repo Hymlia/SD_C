@@ -2,9 +2,9 @@
 
 char * prognum;
 
-bool inscription(bool b) {
+short inscription(short b) {
   printf("Inscription acceptée par le serveur\n");
-  return true;
+  return 1;
 
 }
 
@@ -17,7 +17,7 @@ int main (int argc, char *argv[]) {
   prognum = argv[1];
 
 
-  register(prognum, VERSNUM, 1, inscription, (xdrproc_t) xdr_bool, (xdrproc_t) xdr_bool);
+  register(prognum, VERSNUM, 1, inscription, (xdrproc_t) xdr_short, (xdrproc_t) xdr_short);
   svc_run();
   return 0;
 }

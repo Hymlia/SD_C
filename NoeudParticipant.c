@@ -17,10 +17,10 @@ int main (int argc, char *argv[])
   host = argv[1] ;
   prognum = argv[2];
 
-  bool arg = true;
-  bool res;
+  short arg = 1;
+  short res;
 
-  stat = callrpc(host,prognum, VERSNUM, 1, (xdrproc_t) xdr_bool , (char *)&arg , (xdrproc_t) xdr_bool , (char *)&res );
+  stat = callrpc(host,prognum, VERSNUM, 1, (xdrproc_t) xdr_short , (char *)&arg , (xdrproc_t) xdr_short , (char *)&res );
 
   if(stat != RPC_SUCESS) {
     fprintf(stderr, "Echec de l'appel distant\n") ;
