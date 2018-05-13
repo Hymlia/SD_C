@@ -5,6 +5,9 @@ bloc chainbloc[100] ;
 operation attente[50];
 noeudb voisins[20];
 
+/*
+ * normalement devrainet etre dans fichier à part mais ça
+ */
 bool_t xdr_operation(XDR * xdrs , operation * o) {
   return (xdr_string(xdrs, &o->nom , 15) &&
           xdr_int(xdrs , &o->noeud1) &&
@@ -30,6 +33,19 @@ int ajoutoperationdansattente(operation o) {
   }
 }
 
+void supprimeropsidejapresente(operation o) {
+  for(int i=0;i<50; i++) {
+    operation ocourante = attente[i];
+    if(strcmp(ocourante.nom,"")!=0) {
+      if(strcmp(ocourante.nom, o.nom)==0 && o.noeud1==ocourante.noeud1 && o.noeud2==ocourante.noeud2 && o.quantite==ocourante.quantite) {
+        attente[i].nom ="";
+        attente[i].noeud1=0;
+        attente[i].noeud2 =0;
+        attente[i].quantite=0;
+      }
+    }
+  }
+}
 
 /*
  * Operations serveur
