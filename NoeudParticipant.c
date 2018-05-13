@@ -1,7 +1,7 @@
 #include "include.h"
 
 char * host;
-char * prognum;
+u_long prognum;
 
 int main (int argc, char *argv[])
 {
@@ -15,7 +15,11 @@ int main (int argc, char *argv[])
     exit(1) ;
   }
   host = argv[1] ;
-  prognum = 0x20000100;
+  char * entrop;
+  prognum = strtoul(argv[2], &entrop, 16);
+
+  printf("prognum %lu\n", prognum);
+  fflush(stdout);
 
   int arg = 1;
   int res;
@@ -37,7 +41,7 @@ int main (int argc, char *argv[])
     return 1;
   }
 
-  
+
 
   return 0;
 

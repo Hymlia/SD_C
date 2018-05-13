@@ -5,6 +5,7 @@
 #include <rpc/xdr.h>
 #include <rpc/rpc.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #define VERSNUM 1
 #define PROCNUM 1
@@ -18,10 +19,10 @@ struct operation {
 typedef struct operation operation;
 
 struct bloc {
-  operation[4] operations;
+  operation operations [4] ;
   char * hash;
   char * previoushash;
-}
+};
 typedef struct bloc bloc;
 
 #endif
