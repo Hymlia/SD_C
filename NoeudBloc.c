@@ -2,9 +2,9 @@
 
 char * prognum;
 
-short inscription(short b) {
+short inscription(int b) {
   printf("Inscription acceptée par le serveur\n");
-  return 1;
+  return (int)1;
 
 }
 
@@ -14,10 +14,10 @@ int main (int argc, char *argv[]) {
     printf("Usage : %s <prognum>\n",argv[0]) ;
     exit(1) ;
   }
-  prognum = argv[1];
+  prognum = 0x20000100;
 
 
-  register(prognum, VERSNUM, 1, inscription, (xdrproc_t) xdr_short, (xdrproc_t) xdr_short);
+  registerrpc(prognum , VERSNUM, 1, inscription, (xdrproc_t) xdr_int, (xdrproc_t) xdr_int);
   svc_run();
   return 0;
 }

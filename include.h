@@ -9,11 +9,11 @@
 #define PROCNUM 1
 
 struct operation {
-  char[] nom;
+  char * nom;
   int noeud1;
   int noeud2;
   float quantite;
-}
+};
 typedef struct operation operation;
 
 

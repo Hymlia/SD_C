@@ -15,21 +15,21 @@ int main (int argc, char *argv[])
     exit(1) ;
   }
   host = argv[1] ;
-  prognum = argv[2];
+  prognum = 0x20000100;
 
-  short arg = 1;
-  short res;
+  int arg = 1;
+  int res;
 
-  stat = callrpc(host,prognum, VERSNUM, 1, (xdrproc_t) xdr_short , (char *)&arg , (xdrproc_t) xdr_short , (char *)&res );
+  stat = callrpc(host,prognum, VERSNUM, 1, (xdrproc_t) xdr_int, (char *)&arg , (xdrproc_t) xdr_int , (char *)&res );
 
-  if(stat != RPC_SUCESS) {
+  if(stat != RPC_SUCCESS) {
     fprintf(stderr, "Echec de l'appel distant\n") ;
     clnt_perrno(stat) ;
     fprintf(stderr, "\n") ;
     return 1 ;
   }
 
-  if(res) {
+  if(res==1) {
     printf("Le noeud est bien inscrit\n");
   }
   else {
