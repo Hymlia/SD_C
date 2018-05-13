@@ -8,23 +8,25 @@ int main (int argc, char *argv[])
   enum clnt_stat stat ;
   char *host ;
   int procnum ;
+  int id;
 
-  if (argc != 3)
+  if (argc != 4)
   {
-    printf("Usage : %s <machine_serveur> <prognum> \n",argv[0]) ;
+    printf("Usage : %s <machine_serveur> <prognum> <id>\n",argv[0]) ;
     exit(1) ;
   }
   host = argv[1] ;
   char * entrop;
   prognum = strtoul(argv[2], &entrop, 16);
+  id = atoi(argv[3]);
 
   printf("prognum %lu\n", prognum);
   fflush(stdout);
 
-  int arg = 1;
+
   int res;
 
-  stat = callrpc(host,prognum, VERSNUM, 1, (xdrproc_t) xdr_int, (char *)&arg , (xdrproc_t) xdr_int , (char *)&res );
+  stat = callrpc(host,prognum, VERSNUM, 1, (xdrproc_t) xdr_int, (char *)&id , (xdrproc_t) xdr_int , (char *)&res );
 
   if(stat != RPC_SUCCESS) {
     fprintf(stderr, "Echec de l'appel distant\n") ;
