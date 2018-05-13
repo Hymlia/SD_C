@@ -5,6 +5,12 @@ bloc chainbloc[100] ;
 operation attente[50];
 noeudb voisins[20];
 
+bool_t xdr_operation(XDR * xdrs , operation * o) {
+  return (xdr_string(xdrs, &o->nom , 15) &&
+          xdr_int(xdrs , &o->noeud1) &&
+          xdr_int(xdrs ,&o->noeud2) &&
+          xdr_float(xdrs  , &o->quantite));
+}
 
 /*
  * Operations serveur
@@ -27,6 +33,13 @@ short inscription(int id) {
         clnt_perrno(stat) ;
         fprintf(stderr, "\n") ;
         return 1 ;
+      }
+
+      if(res==1) {
+        printf("L'operation a été envoyée au voisin %s : %lu\n", nbcourant.addr, nbcourant.pn);
+      }
+      else {
+        printf("L'operation n'a été pas envoyée au voisin %s : %lu\n", nbcourant.addr, nbcourant.pn);
       }
     }
   }
@@ -58,7 +71,7 @@ void recevoirbloc(bloc b) {
 }
 
 void recevoiroperation(operation o) {
-
+  
 }
 
 /*
