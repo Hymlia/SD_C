@@ -26,4 +26,13 @@ struct bloc {
 };
 typedef struct bloc bloc;
 
+struct noeudb {
+  char * addr;
+  u_long pn;
+};
+typedef struct noeudb noeudb;
+
+bool_t xdr_operation(XDR* xdrs , operation * o);
+bool_t xdr_bloc(XDR* xdrs , bloc * o);
+
 #endif
