@@ -11,8 +11,8 @@ noeudb voisins[20];
  * Operations auxiliaires
  */
 
+//revoie l'indice du dernier bloc occupe dans chainbloc
  int indicedernierbloc() {
-   printf("%lu dans indicedernierbloc\n", prognum);
    int i=0;
    int trouve=0;
    while(i<100 && trouve==0) {
@@ -25,26 +25,23 @@ noeudb voisins[20];
    }
 
      return i-1;
-
 }
 
+//supprime les operations qui sont dans le bloc de la liste d'attente
 void supprimeropdubloc(bloc b) {
-  printf("%lu dans supprimeropbloc\n", prognum);
   operation operationvide = {"",0,0,0};
   for(int i=0; i<4;i++) {
     for(int j=0;j<50; j++) {
       operation o1 = b.operations[i];
       operation o2 = attente[j];
-      printf("%lu nom op1 : %s nom op2 : %s\n", prognum,o1.nom , o2.nom);
       if(strcmp(o1.nom,o2.nom)==0 && o1.noeud1==o2.noeud1 && o1.noeud2 == o2.noeud2 && o1.quantite == o2.quantite && o1.time == o2.time) {
-        printf("%lu dans if de supprimeropbloc\n", prognum);
         attente[i] = operationvide;
       }
     }
   }
-  printf("%lu fin supprimeropbloc\n", prognum);
 }
 
+//revoie 1 si l'operation existe dans la liste d'attente 0 sinon
  int operationdejadansattente(operation o) {
    int res=0;
    for(int i=0; i<50; i++) {
@@ -56,13 +53,13 @@ void supprimeropdubloc(bloc b) {
    return res;
  }
 
+//renvoie le hash du bloc
  char * hashbloc(bloc b) {
-   //char * res ="";
    char * res ="hash";
    return res;
  }
 
-
+//ajoute l'operation dans la liste d'attente renvoie 1 si c'est reussi 0 sinon
 int ajoutoperationdansattente(operation o) {
   int i=0;
   if(operationdejadansattente(o)==0) {
@@ -85,6 +82,7 @@ int ajoutoperationdansattente(operation o) {
   }
 }
 
+//ajoute les operations du bloc a la liste d'attente
 void  ajouteropdubloc(bloc b) {
   int i=0;
   while(i<4) {
@@ -96,6 +94,7 @@ void  ajouteropdubloc(bloc b) {
   }
 }
 
+//supprime l'operation si elle est dans la liste d'attente
 void supprimeropsidejapresente(operation o) {
   for(int i=0;i<50; i++) {
     operation ocourante = attente[i];
@@ -110,6 +109,7 @@ void supprimeropsidejapresente(operation o) {
   }
 }
 
+//envoie l'operation a tous les voisins
 void envoyeroperation(operation o) {
   for(int i = 0; i<20; i++) {
     if(voisins[i].pn !=0 && voisins[i].pn!=o.envoyeur) {
@@ -123,7 +123,6 @@ void envoyeroperation(operation o) {
         fprintf(stderr, "Echec de l'appel distant\n") ;
         clnt_perrno(stat) ;
         fprintf(stderr, "\n") ;
-        //return 1 ;
       }
 
       if(retour==1) {
@@ -136,8 +135,8 @@ void envoyeroperation(operation o) {
   }
 }
 
+//envoie le bloc aux voisins
 void envoyerbloc(bloc b) {
-  printf("%lu dans envoyerbloc\n", prognum);
   for(int i = 0; i<20; i++) {
     if(voisins[i].pn !=0) {
       noeudb nbcourant = voisins[i];
@@ -162,51 +161,8 @@ void envoyerbloc(bloc b) {
   }
 }
 
+//recupere les 4 premiere operations dans la liste d'attente
 operation* recuperer4op() {
-  printf("%lu dans recuperer4op\n", prognum);
-  /*operation o1= {" ",0,0,0,0,0};
-  operation o2= {" ",0,0,0,0,0};
-  operation o3= {" ",0,0,0,0,0};
-  operation o4= {" ",0,0,0,0,0};
-
-  int i =0;
-  int trouve =0;
-  while(i<50 && trouve==0) {
-    if(strcmp(attente[i].nom,"")!=0) {
-      trouve =1;
-      o1 = attente[i];
-    }
-    i++;
-  }
-  trouve=0;
-  while(i<50 && trouve==0) {
-    if(strcmp(attente[i].nom,"")!=0) {
-      trouve =1;
-      o2 = attente[i];
-    }
-    i++;
-  }
-  while(i<50 && trouve==0) {
-    if(strcmp(attente[i].nom,"")!=0) {
-      trouve =1;
-      o3 = attente[i];
-    }
-    i++;
-  }
-  trouve=0;
-  while(i<50 && trouve==0) {
-    if(strcmp(attente[i].nom,"")!=0) {
-      trouve =1;
-      o4 = attente[i];
-    }
-    i++;
-  }
-  operation * tab = malloc(4*sizeof(operation));
-  tab[0]=o1;
-  tab[1]=o2;
-  tab[2]=o3;
-  tab[3]=o4;*/
-
   operation * tab = malloc(4*sizeof(operation));
   int i =0;
   int nbtrouve =0;
@@ -236,7 +192,6 @@ int * inscription(int * id) {
   printf("Inscription acceptée par le serveur\n");
   time_t t = time(0);
   operation o = {"Inscription", id , 0 , 0, (int) t, prognum};
-  printf("Temps op %i\n", o.time);
   ajoutoperationdansattente(o);
   envoyeroperation(o);
   return &resinsc;
@@ -268,7 +223,6 @@ float * demandepts(int * id) {
 
 int * recevoirbloc(bloc * b) {
   static int resb = 1;
-  printf("%lu dans recevoir bloc\n", prognum);
   int ilastb = indicedernierbloc();
   if(ilastb<99) {
     bloc lastb = chainbloc[ilastb];
@@ -291,7 +245,6 @@ int * recevoirbloc(bloc * b) {
 
 int * recevoiroperation(operation * o) {
   static int resro ;
-  printf("Dans recevoir operation\n");
   int i = ajoutoperationdansattente(*o);
   envoyeroperation(*o);
   if(i==1) {
@@ -312,10 +265,7 @@ int * recevoiroperation(operation * o) {
     while(1) {
       int attente = rand()%(40-20) +20;
       sleep(attente);
-      printf("%lu va creer un bloc\n", prognum);
       operation * tab = recuperer4op();
-      printf("%lu a retourné 4 op\n", prognum);
-      printf("%lu dans creer bloc op1 : %s %s %s %s",prognum,tab[0].nom, tab[1].nom, tab[2].nom ,tab[3].nom );
       operation o1 = tab[0];
       operation o2 = tab[1];
       operation o3 = tab[2];
@@ -323,17 +273,11 @@ int * recevoiroperation(operation * o) {
       operation t[] = {{o1.nom , o1.noeud1 , o1.noeud2 , o1.quantite , o1.time , o1.envoyeur}, {o2.nom , o2.noeud1 , o2.noeud2 , o2.quantite , o2.time , o2.envoyeur}, {o3.nom , o3.noeud1 , o3.noeud2 , o3.quantite , o3.time , o3.envoyeur} ,{o4.nom , o4.noeud1 , o4.noeud2 , o4.quantite , o4.time , o4.envoyeur}};
       int ilastb = indicedernierbloc();
       if(ilastb<99) {
-        printf("%lu peut ajouter bloc\n", prognum);
         bloc lastb = chainbloc[ilastb];
-        printf("%lu a recuppere dernier bloc\n", prognum);
         char * hashancien = hashbloc(lastb);
-        printf("%lu a hashe dernier bloc\n", prognum);
         bloc b = {"",hashancien,t};
-        printf("%lu cree nouv bloc\n", prognum);
         char * nhash = hashbloc(b);
-        printf("%lua hashe nouveau bloc\n", prognum);
         b.hash=nhash;
-        printf("%lu a cree un bloc\n", prognum);
         chainbloc[ilastb+1]= b;
         //supprimeropdubloc(b);
         envoyerbloc(b);
@@ -358,24 +302,24 @@ int main (int argc, char *argv[]) {
   }
   char * entrop;
   prognum = strtoul(argv[1], &entrop, 16) ;
-  printf("prognum %lu\n", prognum);
   fflush(stdout);
 
   operation operationvide = {"",0,0,0};
 
-  //chainbloc = malloc(sizeof(bloc)*100);
+//initialisation chainbloc
   for(int i=0; i<100; i++) {
     bloc bloccourant = {.operations ={operationvide,operationvide,operationvide,operationvide},.hash="",.previoushash=""};
     chainbloc[i] = bloccourant;
   }
+  //initialisation liste d'attente
   for(int i=0; i<50;i++) {
     attente[i]=operationvide;
   }
+  //initialisation voisins
   for(int i=0;i<20;i++) {
     noeudb n = {"",0};
     voisins[i]=n;
   }
-
   if(argc > 2) {
     int nbvoisin = 0;
     for(int i = 2; i<argc; i=i+2) {

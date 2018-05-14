@@ -40,8 +40,6 @@ int main (int argc, char *argv[])
   prognum = strtoul(argv[2], &entrop, 16);
   id = atoi(argv[3]);
 
-  printf("prognum %lu\n", prognum);
-  fflush(stdout);
 
   sleep(1);
   int res;
