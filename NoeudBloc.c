@@ -11,6 +11,22 @@ noeudb voisins[20];
  * Operations auxiliaires
  */
 
+ int indicedernierbloc() {
+   int i=0;
+   trouve=0;
+   while(i<100 && trouve==0) {
+     if(strcmp(chainbloc[i],"")==0) {
+       trouve=1;
+     }
+     else {
+       i++;
+     }
+   }
+
+     return i;
+
+}
+
  int operationdejadansattente(operation o) {
    printf("%lu dans operationdejaenattente \n", prognum);
    int res=0;
@@ -24,7 +40,7 @@ noeudb voisins[20];
  }
 
  char * hashbloc(bloc b) {
-   char * res ="";
+   char * res =b.operations[0].nom[0]+b.operations[1].nom[0]+b.operations[2].nom[0]+b.operations[3].nom[0];
    return res;
  }
 
@@ -122,6 +138,53 @@ void envoyerbloc(bloc b) {
   }
 }
 
+operation* recuperer4op() {
+  operation o1= {" ",0,0,0,0,0};
+  operation o2= {" ",0,0,0,0,0};
+  operation o3= {" ",0,0,0,0,0};
+  operation o4= {" ",0,0,0,0,0};
+
+  int i =0;
+  int trouve =0;
+  while(i<50 && trouve==0) {
+    if(strcmp(attente[i].nom,"")!=0) {
+      trouve =1;
+      o1 = attente[i];
+    }
+    i++;
+  }
+  trouve=0;
+  while(i<50 && trouve==0) {
+    if(strcmp(attente[i].nom,"")!=0) {
+      trouve =1;
+      o2 = attente[i];
+    }
+    i++;
+  }
+  while(i<50 && trouve==0) {
+    if(strcmp(attente[i].nom,"")!=0) {
+      trouve =1;
+      o3 = attente[i];
+    }
+    i++;
+  }
+  trouve=0;
+  while(i<50 && trouve==0) {
+    if(strcmp(attente[i].nom,"")!=0) {
+      trouve =1;
+      o4 = attente[i];
+    }
+    i++;
+  }
+  operation * tab = malloc(4*sizeof(operation));
+  tab[0]=o1;
+  tab[1]=o2;
+  tab[2]=o3;
+  tab[3]=o4;
+  return tab;
+
+}
+
 /*
  * Operations serveur
  */
@@ -184,7 +247,25 @@ int * recevoiroperation(operation * o) {
  * creation blocs
  */
  void * creerbloc() {
+    while(1) {
+      int attente = rand()%(40-20) +20;
+      sleep(attente);
+      operation * tab = recuperer4op();
+      operation t[] = {tab[0], tab[1], tab[2] ,tab[3]};
+      int ilastb = indicedernierbloc();
+      if(ilastb<99) {
+        bloc lastb = chainbloc[ilastb];
+        char * hashancien = hash(lastb);
+        bloc b = {"",hashancien,t};
+        printf("%lu a cree un bloc\n", prognum);
+        chainbloc[ilastb+1]= b;
 
+      }
+      else {
+        printf("La blocchain de %lu est pleine\n", prognum);
+      }
+
+    }
  }
 
 /*
