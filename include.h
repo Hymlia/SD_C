@@ -16,6 +16,7 @@ struct operation {
   int noeud1;
   int noeud2;
   float quantite;
+  int time;
 };
 typedef struct operation operation;
 

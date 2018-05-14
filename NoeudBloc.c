@@ -12,7 +12,19 @@ bool_t xdr_operation(XDR * xdrs , operation * o) {
   return (xdr_string(xdrs, &o->nom , 15) &&
           xdr_int(xdrs , &o->noeud1) &&
           xdr_int(xdrs ,&o->noeud2) &&
-          xdr_float(xdrs  , &o->quantite));
+          xdr_float(xdrs  , &o->quantite) &&
+          xdr_int(xdrs, &o->time)
+        );
+}
+
+bool_t xdr_bloc(XDR * xdrs , bloc * o) {
+  return (xdr_string(xdrs, &o->hash , 200) &&
+          xdr_string( xdrs , &o->previoushash , 200) &&
+          xdr_operation(xdrs, &o->operations[0]) &&
+          xdr_operation(xdrs , &o->operations[1]) &&
+          xdr_operation(xdrs, &o->operations[2]) &&
+          xdr_operation(xdrs , &o->operations[3])
+        );
 }
 
 /*
@@ -37,7 +49,7 @@ void supprimeropsidejapresente(operation o) {
   for(int i=0;i<50; i++) {
     operation ocourante = attente[i];
     if(strcmp(ocourante.nom,"")!=0) {
-      if(strcmp(ocourante.nom, o.nom)==0 && o.noeud1==ocourante.noeud1 && o.noeud2==ocourante.noeud2 && o.quantite==ocourante.quantite) {
+      if(strcmp(ocourante.nom, o.nom)==0 && o.noeud1==ocourante.noeud1 && o.noeud2==ocourante.noeud2 && o.quantite==ocourante.quantite && o.time == ocourante.time) {
         attente[i].nom ="";
         attente[i].noeud1=0;
         attente[i].noeud2 =0;
@@ -47,15 +59,7 @@ void supprimeropsidejapresente(operation o) {
   }
 }
 
-/*
- * Operations serveur
- */
-int * inscription(int id) {
-  static int resinsc = 1;
-  printf("Inscription acceptée par le serveur\n");
-  operation o = {"Inscription", id , 0 , 0};
-  ajoutoperationdansattente(o);
-  //printf("%s\n",attente[0].nom);
+void envoyeroperation(operation o) {
   for(int i = 0; i<20; i++) {
     if(voisins[i].pn !=0) {
       noeudb nbcourant = voisins[i];
@@ -78,6 +82,43 @@ int * inscription(int id) {
       }
     }
   }
+}
+
+void envoyerbloc(bloc b) {
+  for(int i = 0; i<20; i++) {
+    if(voisins[i].pn !=0) {
+      noeudb nbcourant = voisins[i];
+      int retour;
+      enum clnt_stat stat ;
+      stat = callrpc(nbcourant.addr,nbcourant.pn, VERSNUM, 3, (xdrproc_t) xdr_bloc, (char *)&b , (xdrproc_t) xdr_int , (char *)&retour );
+
+      if(stat != RPC_SUCCESS) {
+        fprintf(stderr, "Echec de l'appel distant\n") ;
+        clnt_perrno(stat) ;
+        fprintf(stderr, "\n") ;
+        return 1 ;
+      }
+
+      if(retour==1) {
+        printf("Le bloc a été envoyée au voisin %s : %lu\n", nbcourant.addr, nbcourant.pn);
+      }
+      else {
+        printf("Le bloc n'a été pas envoyée au voisin %s : %lu\n", nbcourant.addr, nbcourant.pn);
+      }
+    }
+  }
+}
+
+/*
+ * Operations serveur
+ */
+int * inscription(int id) {
+  static int resinsc = 1;
+  printf("Inscription acceptée par le serveur\n");
+  time_t t = time(0);
+  operation o = {"Inscription", id , 0 , 0, (int) t};
+  ajoutoperationdansattente(o);
+  envoyeroperation(o);
   return &resinsc;
 }
 
@@ -98,6 +139,8 @@ float * demandepts(int id) {
       }
     }
   }
+  time_t t = time(0);
+  operation o = {"Demande", id , 0 ,0 , (int) t};
   return &respts;
 }
 
@@ -114,9 +157,8 @@ int * recevoiroperation(operation o) {
   else {
     resro=-1;
   }
+  envoyeroperation(o);
   return &resro;
-
-
 }
 
 
