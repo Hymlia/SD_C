@@ -17,7 +17,7 @@ struct operation {
   int noeud2;
   float quantite;
   int time;
-  u_long createur;
+  u_long envoyeur;
 };
 typedef struct operation operation;
 

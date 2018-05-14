@@ -43,7 +43,7 @@ int main (int argc, char *argv[])
   printf("prognum %lu\n", prognum);
   fflush(stdout);
 
-
+  sleep(1);
   int res;
 
   stat = callrpc(host,prognum, VERSNUM, 1, (xdrproc_t) xdr_int, (char *)&id , (xdrproc_t) xdr_int , (char *)&res );

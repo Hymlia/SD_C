@@ -6,6 +6,6 @@ bool_t xdr_operation(XDR * xdrs , operation * o) {
           xdr_int(xdrs ,&o->noeud2) &&
           xdr_float(xdrs  , &o->quantite) &&
           xdr_int(xdrs, &o->time) &&
-          xdr_u_long(xdrs, &o->createur)
+          xdr_u_long(xdrs, &o->envoyeur)
         );
 }

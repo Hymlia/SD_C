@@ -5,48 +5,51 @@ bloc chainbloc[100] ;
 operation attente[50];
 noeudb voisins[20];
 
-/*
- * normalement devrainet etre dans fichier à part mais ça
- */
-/*bool_t xdr_operation(XDR * xdrs , operation * o) {
-  return (xdr_string(xdrs, &o->nom , 15) &&
-          xdr_int(xdrs , &o->noeud1) &&
-          xdr_int(xdrs ,&o->noeud2) &&
-          xdr_float(xdrs  , &o->quantite) &&
-          xdr_int(xdrs, &o->time) &&
-          xdr_u_long(xdrs, &o->createur)
-        );
-}*/
 
-/*bool_t xdr_bloc(XDR * xdrs , bloc * o) {
-  return (xdr_string(xdrs, &o->hash , 200) &&
-          xdr_string( xdrs , &o->previoushash , 200) &&
-          xdr_operation(xdrs, &o->operations[0]) &&
-          xdr_operation(xdrs , &o->operations[1]) &&
-          xdr_operation(xdrs, &o->operations[2]) &&
-          xdr_operation(xdrs , &o->operations[3])
-        );
-}*/
 
 /*
  * Operations auxiliaires
  */
 
+ int operationdejadansattente(operation o) {
+   int res=0;
+   for(int i=0; i<50; i++) {
+     operation oc = attente[i];
+     if(strcmp(oc.nom,o.nom)==0 && o.noeud1==oc.noeud1 && o.noeud2 == oc.noeud2 && o.quantite == oc.quantite && o.time == oc.time) {
+       res=1;
+     }
+   }
+   return res;
+ }
+
+ char * hashbloc(bloc b) {
+   char * res ="";
+   return res;
+ }
+
 int ajoutoperationdansattente(operation o) {
   int i=0;
-  while(i<50 && strcmp(attente[i].nom, "")!=0) {
-    i++;
-  }
-  if(i!=50) {
-    attente[i]=o;
-    printf("Operation ajoutée\n");
-    return 1;
+  if(operationdejadansattente(o)==0) {
+    while(i<50 && strcmp(attente[i].nom, "")!=0) {
+      i++;
+    }
+    if(i!=50) {
+      attente[i]=o;
+      printf("Operation ajoutée\n");
+      return 1;
+    }
+    else {
+      printf("Problème ajout operation\n");
+      return -1;
+    }
   }
   else {
-    printf("Problème ajout operation\n");
+    printf("Operation deja dans attente\n");
     return -1;
   }
 }
+
+
 
 void supprimeropsidejapresente(operation o) {
   for(int i=0;i<50; i++) {
@@ -66,12 +69,12 @@ void envoyeroperation(operation o) {
   printf("Dans envoyeroperation \n");
   for(int i = 0; i<20; i++) {
     printf("voisin[i].pn = %i\n", voisins[i].pn);
-    if(voisins[i].pn !=0 && voisins[i].pn!=o.createur) {
+    if(voisins[i].pn !=0 && voisins[i].pn!=o.envoyeur) {
       printf("il y a un voisin a qui envoyer op \n");
       noeudb nbcourant = voisins[i];
       int retour;
       enum clnt_stat stat ;
-      o.createur = prognum;
+      o.envoyeur = prognum;
       stat = callrpc(nbcourant.addr,nbcourant.pn, VERSNUM, 4, (xdrproc_t) xdr_operation, (char *)&o , (xdrproc_t) xdr_int , (char *)&retour );
 
       if(stat != RPC_SUCCESS) {
@@ -175,6 +178,9 @@ int * recevoiroperation(operation o) {
 /*
  * creation blocs
  */
+ void * creerbloc() {
+
+ }
 
 /*
  * main
@@ -214,6 +220,11 @@ int main (int argc, char *argv[]) {
       nbvoisin ++;
     }
   }
+  pthread_t thr ;
+  if(pthread_create(&thr, NULL, creerbloc, NULL) == -1) {
+    perror("pthread_create");
+    return EXIT_FAILURE;
+  }
 
 
   registerrpc(prognum , VERSNUM, 1, inscription, (xdrproc_t) xdr_int, (xdrproc_t) xdr_int);
@@ -222,5 +233,13 @@ int main (int argc, char *argv[]) {
   registerrpc(prognum , VERSNUM, 4, recevoiroperation, (xdrproc_t) xdr_operation, (xdrproc_t) xdr_int);
 
   svc_run();
+
+  printf("fin serveur \n");
+  if (pthread_join(thr, NULL)) {
+      perror("pthread_join");
+      return EXIT_FAILURE;
+  }
+
+
   return 0;
 }
