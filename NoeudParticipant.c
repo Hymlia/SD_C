@@ -56,7 +56,7 @@ int main (int argc, char *argv[])
     printf("Le noeud est bien inscrit\n");
   }
   else {
-    printf("Le noeud n'est pas inscrit\n");
+    printf("Le noeud %i n'est pas inscrit\n", id);
     return 1;
   }
 

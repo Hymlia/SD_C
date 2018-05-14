@@ -13,7 +13,8 @@ bool_t xdr_operation(XDR * xdrs , operation * o) {
           xdr_int(xdrs , &o->noeud1) &&
           xdr_int(xdrs ,&o->noeud2) &&
           xdr_float(xdrs  , &o->quantite) &&
-          xdr_int(xdrs, &o->time)
+          xdr_int(xdrs, &o->time) &&
+          xdr_u_long(xdrs, &o->createur)
         );
 }
 
@@ -38,9 +39,11 @@ int ajoutoperationdansattente(operation o) {
   }
   if(i!=50) {
     attente[i]=o;
+    printf("Operation ajoutée\n");
     return 1;
   }
   else {
+    printf("Problème ajout operation\n");
     return -1;
   }
 }
@@ -60,11 +63,15 @@ void supprimeropsidejapresente(operation o) {
 }
 
 void envoyeroperation(operation o) {
+  printf("Dans envoyeroperation \n");
   for(int i = 0; i<20; i++) {
-    if(voisins[i].pn !=0) {
+    printf("voisin[i].pn = %i\n", voisins[i].pn);
+    if(voisins[i].pn !=0 && voisins[i].pn!=o.createur) {
+      printf("il y a un voisin a qui envoyer op \n");
       noeudb nbcourant = voisins[i];
       int retour;
       enum clnt_stat stat ;
+      o.createur = prognum;
       stat = callrpc(nbcourant.addr,nbcourant.pn, VERSNUM, 4, (xdrproc_t) xdr_operation, (char *)&o , (xdrproc_t) xdr_int , (char *)&retour );
 
       if(stat != RPC_SUCCESS) {
@@ -116,7 +123,8 @@ int * inscription(int id) {
   static int resinsc = 1;
   printf("Inscription acceptée par le serveur\n");
   time_t t = time(0);
-  operation o = {"Inscription", id , 0 , 0, (int) t};
+  operation o = {"Inscription", id , 0 , 0, (int) t, prognum};
+  printf("Temps op %i\n", o.time);
   ajoutoperationdansattente(o);
   envoyeroperation(o);
   return &resinsc;
@@ -140,7 +148,9 @@ float * demandepts(int id) {
     }
   }
   time_t t = time(0);
-  operation o = {"Demande", id , 0 ,0 , (int) t};
+  operation o = {"Demande", id , 0 ,0 , (int) t, prognum};
+  ajoutoperationdansattente(o);
+  envoyeroperation(o);
   return &respts;
 }
 
@@ -201,13 +211,16 @@ int main (int argc, char *argv[]) {
     for(int i = 2; i<argc; i=i+2) {
       noeudb n = {argv[i] , strtoul(argv[i+1], &entrop,16)};
       voisins[nbvoisin] = n ;
+      nbvoisin ++;
     }
   }
 
 
   registerrpc(prognum , VERSNUM, 1, inscription, (xdrproc_t) xdr_int, (xdrproc_t) xdr_int);
   registerrpc(prognum , VERSNUM, 2, demandepts, (xdrproc_t) xdr_int, (xdrproc_t) xdr_float);
-  registerrpc(prognum , VERSNUM, 3, recevoiroperation, (xdrproc_t) xdr_operation, (xdrproc_t) xdr_int);
+  registerrpc(prognum , VERSNUM, 3, recevoirbloc, (xdrproc_t) xdr_bloc, (xdrproc_t) xdr_int);
+  registerrpc(prognum , VERSNUM, 4, recevoiroperation, (xdrproc_t) xdr_operation, (xdrproc_t) xdr_int);
+
   svc_run();
   return 0;
 }
