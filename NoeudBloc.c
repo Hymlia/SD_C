@@ -12,10 +12,11 @@ noeudb voisins[20];
  */
 
  int indicedernierbloc() {
+   printf("%lu dans indicedernierbloc\n", prognum);
    int i=0;
-   trouve=0;
+   int trouve=0;
    while(i<100 && trouve==0) {
-     if(strcmp(chainbloc[i],"")==0) {
+     if(strcmp(chainbloc[i].hash,"")==0) {
        trouve=1;
      }
      else {
@@ -23,12 +24,28 @@ noeudb voisins[20];
      }
    }
 
-     return i;
+     return i-1;
 
 }
 
+void supprimeropdubloc(bloc b) {
+  printf("%lu dans supprimeropbloc\n", prognum);
+  operation operationvide = {"",0,0,0};
+  for(int i=0; i<4;i++) {
+    for(int j=0;j<50; j++) {
+      operation o1 = b.operations[i];
+      operation o2 = attente[j];
+      printf("%lu nom op1 : %s nom op2 : %s\n", prognum,o1.nom , o2.nom);
+      if(strcmp(o1.nom,o2.nom)==0 && o1.noeud1==o2.noeud1 && o1.noeud2 == o2.noeud2 && o1.quantite == o2.quantite && o1.time == o2.time) {
+        printf("%lu dans if de supprimeropbloc\n", prognum);
+        attente[i] = operationvide;
+      }
+    }
+  }
+  printf("%lu fin supprimeropbloc\n", prognum);
+}
+
  int operationdejadansattente(operation o) {
-   printf("%lu dans operationdejaenattente \n", prognum);
    int res=0;
    for(int i=0; i<50; i++) {
      operation oc = attente[i];
@@ -40,13 +57,13 @@ noeudb voisins[20];
  }
 
  char * hashbloc(bloc b) {
-   char * res =b.operations[0].nom[0]+b.operations[1].nom[0]+b.operations[2].nom[0]+b.operations[3].nom[0];
+   //char * res ="";
+   char * res ="hash";
    return res;
  }
 
+
 int ajoutoperationdansattente(operation o) {
-  printf("%lu : dans ajouterop\n" , prognum);
-  printf("operation : %s\n", o.nom);
   int i=0;
   if(operationdejadansattente(o)==0) {
     while(i<50 && strcmp(attente[i].nom, "")!=0) {
@@ -68,7 +85,16 @@ int ajoutoperationdansattente(operation o) {
   }
 }
 
-
+void  ajouteropdubloc(bloc b) {
+  int i=0;
+  while(i<4) {
+    operation o = b.operations[i];
+    if(operationdejadansattente(o)==0) {
+      ajoutoperationdansattente(o);
+    }
+    i++;
+  }
+}
 
 void supprimeropsidejapresente(operation o) {
   for(int i=0;i<50; i++) {
@@ -85,11 +111,8 @@ void supprimeropsidejapresente(operation o) {
 }
 
 void envoyeroperation(operation o) {
-  printf("Dans envoyeroperation \n operation : %s\n", o.nom);
   for(int i = 0; i<20; i++) {
-    printf("voisin[i].pn = %i\n", voisins[i].pn);
     if(voisins[i].pn !=0 && voisins[i].pn!=o.envoyeur) {
-      printf("il y a un voisin a qui envoyer op \n");
       noeudb nbcourant = voisins[i];
       int retour;
       enum clnt_stat stat ;
@@ -114,6 +137,7 @@ void envoyeroperation(operation o) {
 }
 
 void envoyerbloc(bloc b) {
+  printf("%lu dans envoyerbloc\n", prognum);
   for(int i = 0; i<20; i++) {
     if(voisins[i].pn !=0) {
       noeudb nbcourant = voisins[i];
@@ -139,7 +163,8 @@ void envoyerbloc(bloc b) {
 }
 
 operation* recuperer4op() {
-  operation o1= {" ",0,0,0,0,0};
+  printf("%lu dans recuperer4op\n", prognum);
+  /*operation o1= {" ",0,0,0,0,0};
   operation o2= {" ",0,0,0,0,0};
   operation o3= {" ",0,0,0,0,0};
   operation o4= {" ",0,0,0,0,0};
@@ -180,7 +205,25 @@ operation* recuperer4op() {
   tab[0]=o1;
   tab[1]=o2;
   tab[2]=o3;
-  tab[3]=o4;
+  tab[3]=o4;*/
+
+  operation * tab = malloc(4*sizeof(operation));
+  int i =0;
+  int nbtrouve =0;
+  while(i<50 && nbtrouve<4) {
+    if(strcmp(attente[i].nom,"")!=0) {
+      tab[nbtrouve] = attente[i];
+      nbtrouve++;
+    }
+    i++;
+  }
+
+  operation ovide = {" ",0,0,0,0,0};
+  while(nbtrouve<4) {
+    tab[nbtrouve] = ovide;
+    nbtrouve++;
+  }
+  printf("%lu return 4 op : %s %s %s %s \n", prognum ,tab[0].nom , tab[1].nom , tab[2].nom , tab[3].nom);
   return tab;
 
 }
@@ -223,8 +266,27 @@ float * demandepts(int * id) {
   return &respts;
 }
 
-void * recevoirbloc(bloc * b) {
-
+int * recevoirbloc(bloc * b) {
+  static int resb = 1;
+  printf("%lu dans recevoir bloc\n", prognum);
+  int ilastb = indicedernierbloc();
+  if(ilastb<99) {
+    bloc lastb = chainbloc[ilastb];
+    char * hashlast = hashbloc(lastb);
+    if(strcmp(hashbloc, b->previoushash)==0) {
+      chainbloc[ilastb+1] = *b;
+      //supprimeropdubloc(*b);
+      envoyerbloc(*b);
+    }
+    else {
+      printf("%lu n'accepte pas le nouveau bloc\n", prognum );
+      ajouteropdubloc(*b);
+    }
+  }
+  else {
+    printf("La blocchain de %lu est pleine\n", prognum);
+  }
+  return &resb;
 }
 
 int * recevoiroperation(operation * o) {
@@ -250,15 +312,31 @@ int * recevoiroperation(operation * o) {
     while(1) {
       int attente = rand()%(40-20) +20;
       sleep(attente);
+      printf("%lu va creer un bloc\n", prognum);
       operation * tab = recuperer4op();
-      operation t[] = {tab[0], tab[1], tab[2] ,tab[3]};
+      printf("%lu a retourné 4 op\n", prognum);
+      printf("%lu dans creer bloc op1 : %s %s %s %s",prognum,tab[0].nom, tab[1].nom, tab[2].nom ,tab[3].nom );
+      operation o1 = tab[0];
+      operation o2 = tab[1];
+      operation o3 = tab[2];
+      operation o4 = tab[3];
+      operation t[] = {{o1.nom , o1.noeud1 , o1.noeud2 , o1.quantite , o1.time , o1.envoyeur}, {o2.nom , o2.noeud1 , o2.noeud2 , o2.quantite , o2.time , o2.envoyeur}, {o3.nom , o3.noeud1 , o3.noeud2 , o3.quantite , o3.time , o3.envoyeur} ,{o4.nom , o4.noeud1 , o4.noeud2 , o4.quantite , o4.time , o4.envoyeur}};
       int ilastb = indicedernierbloc();
       if(ilastb<99) {
+        printf("%lu peut ajouter bloc\n", prognum);
         bloc lastb = chainbloc[ilastb];
-        char * hashancien = hash(lastb);
+        printf("%lu a recuppere dernier bloc\n", prognum);
+        char * hashancien = hashbloc(lastb);
+        printf("%lu a hashe dernier bloc\n", prognum);
         bloc b = {"",hashancien,t};
+        printf("%lu cree nouv bloc\n", prognum);
+        char * nhash = hashbloc(b);
+        printf("%lua hashe nouveau bloc\n", prognum);
+        b.hash=nhash;
         printf("%lu a cree un bloc\n", prognum);
         chainbloc[ilastb+1]= b;
+        //supprimeropdubloc(b);
+        envoyerbloc(b);
 
       }
       else {
@@ -287,7 +365,7 @@ int main (int argc, char *argv[]) {
 
   //chainbloc = malloc(sizeof(bloc)*100);
   for(int i=0; i<100; i++) {
-    bloc bloccourant = {.operations ={operationvide,operationvide,operationvide,operationvide},.hash="3",.previoushash=""};
+    bloc bloccourant = {.operations ={operationvide,operationvide,operationvide,operationvide},.hash="",.previoushash=""};
     chainbloc[i] = bloccourant;
   }
   for(int i=0; i<50;i++) {
@@ -306,11 +384,11 @@ int main (int argc, char *argv[]) {
       nbvoisin ++;
     }
   }
-  pthread_t thr ;
+/*  pthread_t thr ;
   if(pthread_create(&thr, NULL, creerbloc, NULL) == -1) {
     perror("pthread_create");
     return EXIT_FAILURE;
-  }
+  }*/
 
 
   registerrpc(prognum , VERSNUM, 1, inscription, (xdrproc_t) xdr_int, (xdrproc_t) xdr_int);
@@ -321,10 +399,10 @@ int main (int argc, char *argv[]) {
   svc_run();
 
   printf("fin serveur \n");
-  if (pthread_join(thr, NULL)) {
+  /*if (pthread_join(thr, NULL)) {
       perror("pthread_join");
       return EXIT_FAILURE;
-  }
+  }*/
 
 
   return 0;
