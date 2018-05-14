@@ -12,6 +12,7 @@ noeudb voisins[20];
  */
 
  int operationdejadansattente(operation o) {
+   printf("%lu dans operationdejaenattente \n", prognum);
    int res=0;
    for(int i=0; i<50; i++) {
      operation oc = attente[i];
@@ -28,6 +29,8 @@ noeudb voisins[20];
  }
 
 int ajoutoperationdansattente(operation o) {
+  printf("%lu : dans ajouterop\n" , prognum);
+  printf("operation : %s\n", o.nom);
   int i=0;
   if(operationdejadansattente(o)==0) {
     while(i<50 && strcmp(attente[i].nom, "")!=0) {
@@ -66,7 +69,7 @@ void supprimeropsidejapresente(operation o) {
 }
 
 void envoyeroperation(operation o) {
-  printf("Dans envoyeroperation \n");
+  printf("Dans envoyeroperation \n operation : %s\n", o.nom);
   for(int i = 0; i<20; i++) {
     printf("voisin[i].pn = %i\n", voisins[i].pn);
     if(voisins[i].pn !=0 && voisins[i].pn!=o.envoyeur) {
@@ -81,7 +84,7 @@ void envoyeroperation(operation o) {
         fprintf(stderr, "Echec de l'appel distant\n") ;
         clnt_perrno(stat) ;
         fprintf(stderr, "\n") ;
-        return 1 ;
+        //return 1 ;
       }
 
       if(retour==1) {
@@ -122,7 +125,7 @@ void envoyerbloc(bloc b) {
 /*
  * Operations serveur
  */
-int * inscription(int id) {
+int * inscription(int * id) {
   static int resinsc = 1;
   printf("Inscription acceptée par le serveur\n");
   time_t t = time(0);
@@ -133,7 +136,7 @@ int * inscription(int id) {
   return &resinsc;
 }
 
-float * demandepts(int id) {
+float * demandepts(int * id) {
   static float respts = 0;
   for(int i=0; i<100; i++) {
     if(strcmp(chainbloc[i].hash,"")!=0) {
@@ -157,20 +160,22 @@ float * demandepts(int id) {
   return &respts;
 }
 
-void * recevoirbloc(bloc b) {
+void * recevoirbloc(bloc * b) {
 
 }
 
-int * recevoiroperation(operation o) {
-  int i = ajoutoperationdansattente(o);
+int * recevoiroperation(operation * o) {
   static int resro ;
+  printf("Dans recevoir operation\n");
+  int i = ajoutoperationdansattente(*o);
+  envoyeroperation(*o);
   if(i==1) {
     resro=1;
   }
   else {
     resro=-1;
   }
-  envoyeroperation(o);
+
   return &resro;
 }
 
@@ -231,7 +236,7 @@ int main (int argc, char *argv[]) {
   registerrpc(prognum , VERSNUM, 2, demandepts, (xdrproc_t) xdr_int, (xdrproc_t) xdr_float);
   registerrpc(prognum , VERSNUM, 3, recevoirbloc, (xdrproc_t) xdr_bloc, (xdrproc_t) xdr_int);
   registerrpc(prognum , VERSNUM, 4, recevoiroperation, (xdrproc_t) xdr_operation, (xdrproc_t) xdr_int);
-
+  printf("%lu a enregistrer ses fonctions\n", prognum);
   svc_run();
 
   printf("fin serveur \n");
