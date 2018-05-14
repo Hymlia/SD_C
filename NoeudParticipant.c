@@ -1,4 +1,6 @@
+#include <pthread.h>
 #include "include.h"
+
 
 char * host;
 u_long prognum;
@@ -7,6 +9,7 @@ int id;
 
 void * demandemespoints(void *arg) {
   while(1) {
+    sleep(5);
     float res;
     enum clnt_stat stat ;
     stat = callrpc(host,prognum, VERSNUM, 2, (xdrproc_t) xdr_int, (char *)&id , (xdrproc_t) xdr_float , (char *)&res );
@@ -18,7 +21,7 @@ void * demandemespoints(void *arg) {
       return 1 ;
     }
     mespoints = res;
-    printf("J'ai %f points\n", mespoints);
+    printf("%i a %f points\n", id ,mespoints);
   }
 }
 
@@ -60,7 +63,15 @@ int main (int argc, char *argv[])
     return 1;
   }
 
-
+  pthread_t thr ;
+  if(pthread_create(&thr, NULL, demandemespoints, NULL) == -1) {
+    perror("pthread_create");
+    return EXIT_FAILURE;
+  }
+  if (pthread_join(thr, NULL)) {
+perror("pthread_join");
+return EXIT_FAILURE;
+  }
 
   return 0;
 

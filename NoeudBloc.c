@@ -8,7 +8,7 @@ noeudb voisins[20];
 /*
  * normalement devrainet etre dans fichier à part mais ça
  */
-bool_t xdr_operation(XDR * xdrs , operation * o) {
+/*bool_t xdr_operation(XDR * xdrs , operation * o) {
   return (xdr_string(xdrs, &o->nom , 15) &&
           xdr_int(xdrs , &o->noeud1) &&
           xdr_int(xdrs ,&o->noeud2) &&
@@ -16,9 +16,9 @@ bool_t xdr_operation(XDR * xdrs , operation * o) {
           xdr_int(xdrs, &o->time) &&
           xdr_u_long(xdrs, &o->createur)
         );
-}
+}*/
 
-bool_t xdr_bloc(XDR * xdrs , bloc * o) {
+/*bool_t xdr_bloc(XDR * xdrs , bloc * o) {
   return (xdr_string(xdrs, &o->hash , 200) &&
           xdr_string( xdrs , &o->previoushash , 200) &&
           xdr_operation(xdrs, &o->operations[0]) &&
@@ -26,7 +26,7 @@ bool_t xdr_bloc(XDR * xdrs , bloc * o) {
           xdr_operation(xdrs, &o->operations[2]) &&
           xdr_operation(xdrs , &o->operations[3])
         );
-}
+}*/
 
 /*
  * Operations auxiliaires
