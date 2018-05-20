@@ -179,8 +179,6 @@ void recuperer4op(operation * tab) {
     tab[nbtrouve] = ovide;
     nbtrouve++;
   }
-  printf("%lu return 4 op : %s %s %s %s \n", prognum ,tab[0].nom , tab[1].nom , tab[2].nom , tab[3].nom);
-  //return tab;
 
 }
 
@@ -227,6 +225,7 @@ int * recevoirbloc(bloc * b) {
   if(ilastb<99) {
     bloc lastb = chainbloc[ilastb];
     char * hashlast = hashbloc(lastb);
+    printf("dans ajouter bloc de %lu, hash du dernier bloc de la chaine local : %s , hash previousbloc du nouveau bloc : %s \n",prognum, hashlast, b->previoushash);
     if(strcmp(hashbloc, b->previoushash)==0) {
       chainbloc[ilastb+1] = *b;
       //supprimeropdubloc(*b);
@@ -271,20 +270,16 @@ int * recevoiroperation(operation * o) {
       operation o2 = tab[1];
       operation o3 = tab[2];
       operation o4 = tab[3];
-      operation t[] = {{o1.nom , o1.noeud1 , o1.noeud2 , o1.quantite , o1.time , o1.envoyeur}, {o2.nom , o2.noeud1 , o2.noeud2 , o2.quantite , o2.time , o2.envoyeur}, {o3.nom , o3.noeud1 , o3.noeud2 , o3.quantite , o3.time , o3.envoyeur} ,{o4.nom , o4.noeud1 , o4.noeud2 , o4.quantite , o4.time , o4.envoyeur}};
       int ilastb = indicedernierbloc();
       if(ilastb<99) {
         bloc lastb = chainbloc[ilastb];
         char * hashancien = hashbloc(lastb);
         time_t ti = time(0);
         bloc b = {.operations={o1,o2,o3,o4},.hash="",.previoushash=hashancien,.time =(int) ti,.createur= prognum};
-        printf("essaye afficher operation bloc \n");
-        printf("operation 1 du bloc : %s\n", b.operations[0].nom);
         char * nhash = hashbloc(b);
         b.hash=nhash;
         chainbloc[ilastb+1]= b;
-        //supprimeropdubloc(b);
-        printf("avant envoyer bloc\n");
+        supprimeropdubloc(b);
         envoyerbloc(b);
 
       }
